@@ -1,116 +1,172 @@
-const express = require("express");
-const app = express();
-var cors = require('cors');
-const { uuid } = require('uuidv4');
-const fs = require('fs');
+const WebSocket = require('ws');
+const { saveDataFile, readDataFile, saveDataFileAsync } = require('./utils/fileManager')
+const { canParseJSON, checkIfUUIDInUse, getKeyByValue } = require('./utils/dataUtils')
+var switchList;
 
-const port = 3100;
 
-var switchs;
+const pairRequests = {}
 
-app.use(express.json())
-app.use(cors());
-
-function init() {
-    readDataFile();
+const connections = {
+  switches: {},
+  clients: []
 }
 
-function saveDataFile() {
-    fs.writeFile('data.json', JSON.stringify(switchs), 'utf8', (err) => {
-        if (err) {
-          console.error('Error writing JSON file:', err);
-          return;
-        }
-        console.log('JSON file has been saved.');
-        })
+
+switchList = readDataFile()
+console.log("What is Switch List ", switchList)
+
+
+const wss = new WebSocket.Server({ port: 3100 });
+
+
+
+function pairSwitch(payload) {
+  switchList[payload.uuid] = payload
+  saveDataFile(switchList)
+  sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
+  return true;
 }
 
-function readDataFile() {
-    fs.access('data.json', fs.constants.F_OK, (err) => {
-        if (err) {
-          fs.writeFile('data.json', '[]', (err) => {
-            if (err) {
-              console.error('Error creating empty file:', err);
-              process.exit(1)
-            }
-            console.log('Empty file has been created.');
-            return;
-          });
-        } else {
-          console.log('File already exists. Starting Reading Process');
-          return;
-        }
-      });
-
-      fs.readFile('data.json', 'utf8', (err, jsonData) => {
-        if (err) {
-          console.error('Error reading JSON file:', err);
-          return;
-        }
-
-        const data = JSON.parse(jsonData);
-        switchs = data;
-        console.log('Read JSON file:', data);
-    })
+function sendReactClientsMessage(message) {
+  for (var webSocketRCIndex in connections.clients) {
+    var webSocketRC = connections.clients[webSocketRCIndex];
+    webSocketRC.send(message)
+  }
 }
 
-function getObjectIndexByUUID(uuid) {
-    for (let i = 0; i < switchs.length; i++) {
-        if (switchs[i].uuid === uuid) {
-            return i;
-        }
-    }
-    return -1; // Return -1 if the UUID is not found
-}
-function checkIfUUIDInUse(uuid) {
-    for(var switche in switchs) {
-        if(switche.uuid == uuid) return true;
-    }
-    return false;
-}
-function pairSwitch(switchName) {
-    const newSwitchUUID = uuid();
-    if(checkIfUUIDInUse(newSwitchUUID)) return false;
-    console.log("Pairing:" + switchName)
-    switchs.push({uuid: newSwitchUUID, value: false,name: switchName})
-    saveDataFile()
-    readDataFile()
-    return true;
-}
 
-app.get("/switchs/:switchId", (req,res) => {
-    const uuid = req.params.switchId;
-    if(uuid == "all") {
-        res.status(200).send(switchs);
+function handleAuthentication(ws, message) {
+  const payload = message.payload
+  switch (payload.devType) {
+    case "reactClient":
+      connections.clients.push(ws);
+      ws.send(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
+      console.log("Clients Length: " + connections.clients.length)
+      break;
+    case "switch":
+      if (switchList[payload.uuid] == null) {
+        console.log("Connection Failed: Device Not Paired")
+        console.log("Switch List: ", switchList)
+        console.log("Payload UUID: ", payload.uuid)
+        console.log("Switch List Ask UUID Object: ", switchList[payload.uuid])
+        ws.send(JSON.stringify({ type: 'connectFailed', payload: { reason: "Device is not paired" } }))
         return;
-    }
-    res.status(200).send(switchs[getObjectIndexByUUID(uuid)])
-})
+      }
+
+      const switchObject = switchList[payload.uuid];
+      switchObject.connected = true;
+      connections.switches[payload.uuid] = ws
+      ws.send(JSON.stringify({ type: 'connectSuccess', payload: {currentValue: switchObject.value}}))
+      console.log("Switch List: ", switchList)
+      console.log("Switch Connections: ", connections.switches)
+      console.log("Pair Request: ", pairRequests)
+      sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
+      break;
+
+    default:
+      console.log("Unknown Device Type: ", payload.devType)
+      break;
+  }
+}
+
+function handlePairRequest(ws, request) {
+  const switchUUID = request.payload.uuid;
+  if (checkIfUUIDInUse(switchUUID)) return; // Send Fail Pair ID Already in Use Error
+  let data = JSON.stringify({ type: 'pairRequestInformation', payload: { uuid: switchUUID } })
+  pairRequests[switchUUID] = ws;
+  console.log(pairRequests)
+  sendReactClientsMessage(data)
+
+}
+
+function finishPair(pairData) {
+  const { uuid, customName } = pairData.payload
+
+  if (pairSwitch(pairData.payload)) {
+    const pairConnection = pairRequests[uuid];
+    console.log("Sending Pair Complete Message to ",uuid)
+    pairConnection.send(JSON.stringify({ type: 'pairRequestCompleted', payload: pairData.payload }))
+    pairConnection.close()
+    pairRequests[uuid] = null
+    sendReactClientsMessage(JSON.stringify({ type: 'pairRequestCompleted', payload: pairData.payload }))
+    return;
+  }
+  // Handle if pair failed
+
+}
+
+function handleSwitchToggle(command) {
+  const {uuid, value} = command.payload
+  if(connections.switches[uuid] == null) {
+    switchList[uuid].connected = false; 
+    sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
+    return;
+  } 
+
+  switchList[uuid].value = value;
+  console.log(switchList)
+  saveDataFileAsync(switchList)
+  sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
+  connections.switches[uuid].send(JSON.stringify({ type: 'changeValue', payload: { switchValue: value} }))
+}
 
 
-app.post("/switchs/:switchId", (req,res) => {
-   const switchId = req.params.switchId;
-   if(switchId == 'pair') {
-    console.log(req.body)
-    const switchName = req.body.name;
-    if(switchName == '' || switchName == null) {
-      res.status(500).send("Empty Names are not Allowed")
+
+wss.on('connection', (ws) => {
+
+
+  ws.on('message', (message) => {
+    message = message.toString('utf-8')
+    console.log("Message: ", message)
+
+    if (!canParseJSON(message)) {
+      console.log("Unformatted Message Received (Not JSON): " + message)
       return;
     }
-    if(pairSwitch(switchName)) {
-        res.status(200).send(switchs[switchs.length-1]);
-        return;
-    } 
-    res.status(500).send("The server was unable to pair a new switch")
-    return;
-   }
-   const value = req.body.value;
-   console.log("Requested POST State from UUID -> " + switchId);
-   switchs[getObjectIndexByUUID(switchId)].value = value;
-   res.status(200).send("Switch Toggled");
-})
 
-app.listen(port,() => {
-    init()
-    console.log("We running on port " + port)
-})
+    const messageObject = JSON.parse(message)
+
+    switch (messageObject.type) {
+      
+
+      case 'authenticate':
+        handleAuthentication(ws, messageObject)
+        break;
+      case 'pairRequest':
+        handlePairRequest(ws, messageObject)
+        break;
+
+      case 'pairRequestFinish':
+        finishPair(messageObject)
+        break;
+
+      case 'toggleSwitch':
+      handleSwitchToggle(messageObject)
+      break;
+
+      default:
+        console.log("Unstructured Command Received: " + message)
+        break;
+    }
+  });
+
+  ws.on('close', () => {
+    const indexClient = connections.clients.indexOf(ws);
+    if (indexClient !== -1) {
+      console.log("The following clients disconnected:", connections.clients[indexClient])
+      connections.clients.splice(indexClient, 1)
+    }
+     var key =  getKeyByValue(connections.switches,ws)
+     if (key != null) {
+      const switchObject = switchList[key];
+
+      if (switchObject == null) return;
+      switchObject.connected = false;
+      sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
+      connections.switches[key] = null;
+      return
+    }
+  });
+});
+
+console.log('WebSocket server is running on port 8080');
