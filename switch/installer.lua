@@ -23,13 +23,13 @@ function downloadFile(url, filePath)
     request.close()
   end
 
-
+term.clear()
 writeCentered("Would you like to install Smart Switch?")
 os.pullEvent("key")
 writeCentered("Dowloading Utils File")
 downloadFile('https://raw.githubusercontent.com/amoreira2003/AutomaticHouse/main/switch/utils.lua',"./smartSwitch/utils.lua")
 writeCentered("Dowloading Main File")
-downloadFile('https://raw.githubusercontent.com/amoreira2003/AutomaticHouse/main/switch/smartswitch.lua',"./smartSwitch/utils.lua")
+downloadFile('https://raw.githubusercontent.com/amoreira2003/AutomaticHouse/main/switch/smartswitch.lua',"smartSwitch.lua")
 writeCentered("Dowloading Startup Lock File")
 downloadFile('https://raw.githubusercontent.com/amoreira2003/AutomaticHouse/main/switch/startup.lua',"startup.lua")
 writeCentered("Press any key to start setup")
