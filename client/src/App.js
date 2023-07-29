@@ -12,7 +12,7 @@ function App() {
   const socket = useRef(null)
 
   useEffect(() => {
-    new Sockette('IP GOES HERE', {
+    new Sockette('ws://179.154.221.149:3100', {
       timeout: 1000,  
       maxAttempts: 10,
       onopen: e => { console.log('Connected!', e); socket.current = e.target; e.target.send(JSON.stringify(createPayload("authenticate", { "devType": 'reactClient' }))) },
@@ -100,13 +100,13 @@ function App() {
 
 
 
-  return <div>
+  return <div className='wrapper'>
 
     <div id="overlay" className='overlay'>
       <div className='overlayPairBackground'>
         <div className='overlayPair'>
           <i onClick={() => {closePairSequence()}} className='bx bx-x closeButton'/>
-          <img alt='' width="128px" height="128px" src={on} />
+          <img alt='' className='pairImage' src={on} />
           <h1>Smart Switch</h1>
           <h6>Lets you control your redstone contraptions from anywhere.</h6>
           <div className='overlayPairInfoArea'>
@@ -128,7 +128,7 @@ function App() {
       {Object.keys(switchList).map((uuid) => (
 
         <label style={switchList[uuid].connected ? switchList[uuid].value ? { backgroundColor: '#353f24' } : { backgroundColor: '#232728' } : { backgroundColor: '#3f2424' }} key={uuid} className="switch">
-          <img alt='' width='64px' height='64px' src={switchList[uuid].connected ? switchList[uuid].value ? on : off : off}></img>
+          <img alt='' className="switchImage" src={switchList[uuid].connected ? switchList[uuid].value ? on : off : off}></img>
           <div className='textContainer'>
             <h1>{switchList[uuid].customName ? switchList[uuid].customName : "Smart Switch"}</h1>
             <h6>{switchList[uuid].connected ? switchList[uuid].value ? 'ON' : 'OFF' : 'DISCONNECTED'}</h6>

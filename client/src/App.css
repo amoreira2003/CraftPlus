@@ -9,9 +9,15 @@
 }
 
 body {
+  overflow-x: hidden;
   width: 100vw;
   height: 100vh;
   background: #0d0f0e;
+}
+
+.wrapper {
+  min-width: 20%;
+  min-height: 20%;
 }
 
 .textContainer {
@@ -34,11 +40,11 @@ align-self: center;
   position: relative;
   display: flex;
   align-items: center;
-  width: 40%;
-  height: 100px;
+  width: 60%;
+  height: 125px;
   border-radius: 16px;
   background-color: #5e100f;
-  transition: 200ms ease;
+  transition: 400ms ease;
 }
 
 @keyframes blurInAnimation {
@@ -141,6 +147,11 @@ align-self: center;
 
 }
 
+.pairImage {
+  width: 128px;
+   height: 128px;
+}
+
 .PairInfo input {
   caret-color: transparent;
   outline: none;
@@ -182,4 +193,104 @@ align-self: center;
   text-align: center;
   font-size: 1.2rem;
   color: white;
+}
+
+
+.switchImage {
+  width: 64px;
+  height: 64px;
+}
+
+@media (max-width: 900px) {
+  .switch {
+    margin: 10px;
+    width: 80%;
+    height: 135px;
+  }
+
+  .pairImage {
+    width: 96px;
+     height: 96px;
+  }
+
+  .PairInfo .pairButton {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 8px 0px 0px auto;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    width: 135px;
+    text-align: center;
+    padding: 10px;
+    background-color: #5b723a;
+  }
+
+  .PairInfo input {
+    caret-color: transparent;
+    outline: none;
+    border: none;
+    border-radius: 6px;
+    padding: 5px;
+    padding-left: 10px;
+    appearance: none;
+    font-size: 1.1rem;
+    width: 98%;
+    height: 25%;
+    background-color: #1e201f;
+  }
+
+  .overlayPair {
+    transition: 200ms;
+    animation: zoomInAnimation 150ms ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: ce;
+    border-radius: 18px;
+    background-color: #232728;
+    width: 70%;
+    height: 80%;
+    margin: auto;
+  
+  }
+  .overlayPair h6 {
+    margin: 10px 10px 10px 10px 10px;
+    font-size: 1.2rem;
+  }
+
+  .textContainer {
+    align-self: center;
+     margin: 20px;
+    }
+
+    .switchImage {
+      width: 80px;
+      height: 80px;
+    }
+    .textContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .textContainer  h1{
+      line-height: 1.5rem;
+      font-size: 1.5rem;
+      }
+
+      .overlayPair h6 {
+        margin: 20px 10px 20px 10px 10px;
+        font-size: 1rem;
+      }
+
+      .overlayPair h1 {
+        font-size: 2rem;
+        color: white;
+      }
+
+      .textContainer  h6{
+        line-height: 0.7rem;
+        font-size: 0.7rem;
+      }
 }
