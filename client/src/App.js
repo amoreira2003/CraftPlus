@@ -52,6 +52,7 @@ function App() {
 
   function receiveMessage(socket, message) {
     console.log("Previous Any Switch: ", socket)
+    console.log("Message: ", message)
     if (!canParseJSON(message)) {
       alert("Non Formatted Message Received: " + message)
       return;
@@ -66,6 +67,7 @@ function App() {
         break;
 
       case "syncInformation":
+        console.log(messageParsed)
         console.log("synced", messageParsed.payload.switchList)
         setSwitchList(messageParsed.payload.switchList)
         break;
