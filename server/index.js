@@ -20,6 +20,7 @@ const wss = new WebSocket.Server({ port: 3100 });
 
 function pairSwitch(payload) {
   console.log("Payload: ", payload)
+  console.log("Switch List Before Saving File: ", switchList)
   switchList[payload.uuid] = payload
   saveDataFile(switchList)
   console.log("Switch List After Saving File: ", switchList)
@@ -127,8 +128,7 @@ wss.on('connection', (ws) => {
     const messageObject = JSON.parse(message)
 
     switch (messageObject.type) {
-      
-
+    
       case 'authenticate':
         handleAuthentication(ws, messageObject)
         break;
@@ -169,4 +169,4 @@ wss.on('connection', (ws) => {
   });
 });
 
-console.log('WebSocket server is running on port 8080');
+console.log('WebSocket server is running on port 3100');
