@@ -18,11 +18,10 @@ console.log("What is Switch List ", switchList)
 
 const wss = new WebSocket.Server({ port: 3100 });
 
-
-
 function pairSwitch(payload) {
   switchList[payload.uuid] = payload
   saveDataFile(switchList)
+  console.log("Switch List After Saving File: ", switchList)
   sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
   return true;
 }

@@ -2,6 +2,7 @@ const fs = require('fs');
 
 function saveDataFile(data) {
     try {
+      console.log("Data Sent ", data)
       fs.writeFileSync('data.json', JSON.stringify(data), 'utf8');
       console.log('JSON file has been saved.');
     } catch (error) {

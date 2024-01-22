@@ -12,7 +12,7 @@ function App() {
   const socket = useRef(null)
 
   useEffect(() => {
-    new Sockette('ws://179.154.221.149:3100', {
+    new Sockette('ws://192.168.1.149:3100', {
       timeout: 1000,  
       maxAttempts: 10,
       onopen: e => { console.log('Connected!', e); socket.current = e.target; e.target.send(JSON.stringify(createPayload("authenticate", { "devType": 'reactClient' }))) },
@@ -66,7 +66,7 @@ function App() {
         break;
 
       case "syncInformation":
-        console.log("synced")
+        console.log("synced", messageParsed.payload.switchList)
         setSwitchList(messageParsed.payload.switchList)
         break;
 
