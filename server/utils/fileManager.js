@@ -22,7 +22,7 @@ function saveDataFile(data) {
   function readDataFile() {
     try {
       if (!fs.existsSync('data.json')) {
-        fs.writeFileSync('data.json', '[]');
+        fs.writeFileSync('data.json', '{}');
         console.log('Empty file has been created.');
       } else {
         console.log('File already exists. Starting Reading Process');

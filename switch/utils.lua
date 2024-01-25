@@ -14,7 +14,6 @@ function centerVerticalCursor(offset)
     term.setCursorPos(x, y)
 end
 
-
 function writeToPairFile(socket, data)
     local pairData = fs.open("smartSwitch/pair.data", "w") -- Open the file in write mode
   

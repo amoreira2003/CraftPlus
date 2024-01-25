@@ -64,10 +64,14 @@ align-self: center;
     transform: scale(1);
   }
 }
-
+.relativeButton {
+  width: 100%;
+  position: relative
+}
 .closeButton {
-  position: relative;
-  margin: 20px 20px 0px auto;
+  position: absolute; /* Absolute position for the button */
+  top: 10px; /* Adjust as needed */
+  right: 10px;
 }
 .switch input {
   opacity: 0;
@@ -86,13 +90,13 @@ align-self: center;
 .overlayPairBackground {
   backdrop-filter: blur(10px);
   animation: blurInAnimation 200ms ease-out;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
   display: flex;
-  align-content: center;
+  align-items: center;
   justify-content: center;
 
 }
@@ -101,28 +105,41 @@ align-self: center;
 .overlayPair {
   transition: 200ms;
   animation: zoomInAnimation 150ms ease-out;
-  display: flex;
+
+  display: none;
   flex-direction: column;
   align-items: center;
-  justify-content: ce;
+  justify-content: center;
+
   border-radius: 18px;
   background-color: #232728;
-  width: 30%;
-  height: 80%;
-  margin: auto;
+  
+  max-width: 714px;
+  max-height: 806px;
+
+  width: 80%;
+  height: 70%;
+
+  min-width: 300px;
+  min-height: 455px;
 
 }
 
 .overlayPair img {
-  margin: 10px 0px 10px 0px;
+  margin: 20px 0px 20px 0px;
   background: radial-gradient(circle, rgba(100,116,69,1) 0%, rgba(51,60,43,1) 100%);
-  padding: 5%;
+  padding: 5%;  
   border-radius: 50%;
 
 }
 
 .overlayPair h1 {
-  font-size: 2.5rem;
+  font-size: 200%;
+  color: white;
+}
+
+.overlayPair h6 {
+  font-size: 20%;
   color: white;
 }
 
@@ -130,6 +147,8 @@ align-self: center;
   margin-top: auto;
   height: 30%;
   width: 100%;
+  max-height: 200px;
+  min-height: 180px;
   border-radius: 0px 0px 18px 18px;
   background-color: #333738;
   display: flex;
@@ -141,19 +160,20 @@ align-self: center;
 }
 
 .PairInfo h6 {
-  margin-bottom: 5px;
   font-weight: 300 !important;
   text-align: start !important;
 
 }
 
 .pairImage {
-  width: 128px;
-   height: 128px;
+   width: 20%;
+   height: auto;
+   max-width: 128px;
+   min-width: 86px;
 }
 
 .PairInfo input {
-  caret-color: transparent;
+  caret-color: #333738;
   outline: none;
   border: none;
   border-radius: 6px;
@@ -167,7 +187,7 @@ align-self: center;
 }
 
 .PairInfo .pairButton {
-  position: relative;
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -188,109 +208,14 @@ align-self: center;
 
 .overlayPair h6 {
   font-weight: 100;
-  margin: 10px 10px 10px 10px 10px;
+  margin: 0px 10px 5px 10px;
   align-self: center;
   text-align: center;
   font-size: 1.2rem;
   color: white;
 }
 
-
 .switchImage {
   width: 64px;
   height: 64px;
-}
-
-@media (max-width: 900px) {
-  .switch {
-    margin: 10px;
-    width: 80%;
-    height: 135px;
-  }
-
-  .pairImage {
-    width: 96px;
-     height: 96px;
-  }
-
-  .PairInfo .pairButton {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 8px 0px 0px auto;
-    font-size: 1.1rem;
-    border-radius: 6px;
-    width: 135px;
-    text-align: center;
-    padding: 10px;
-    background-color: #5b723a;
-  }
-
-  .PairInfo input {
-    caret-color: transparent;
-    outline: none;
-    border: none;
-    border-radius: 6px;
-    padding: 5px;
-    padding-left: 10px;
-    appearance: none;
-    font-size: 1.1rem;
-    width: 98%;
-    height: 25%;
-    background-color: #1e201f;
-  }
-
-  .overlayPair {
-    transition: 200ms;
-    animation: zoomInAnimation 150ms ease-out;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: ce;
-    border-radius: 18px;
-    background-color: #232728;
-    width: 70%;
-    height: 80%;
-    margin: auto;
-  
-  }
-  .overlayPair h6 {
-    margin: 10px 10px 10px 10px 10px;
-    font-size: 1.2rem;
-  }
-
-  .textContainer {
-    align-self: center;
-     margin: 20px;
-    }
-
-    .switchImage {
-      width: 80px;
-      height: 80px;
-    }
-    .textContainer {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .textContainer  h1{
-      line-height: 1.5rem;
-      font-size: 1.5rem;
-      }
-
-      .overlayPair h6 {
-        margin: 20px 10px 20px 10px 10px;
-        font-size: 1rem;
-      }
-
-      .overlayPair h1 {
-        font-size: 2rem;
-        color: white;
-      }
-
-      .textContainer  h6{
-        line-height: 0.7rem;
-        font-size: 0.7rem;
-      }
 }

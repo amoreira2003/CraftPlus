@@ -19,11 +19,8 @@ console.log("What is Switch List ", switchList)
 const wss = new WebSocket.Server({ port: 3100 });
 
 function pairSwitch(payload) {
-  console.log("Payload: ", payload)
-  console.log("Switch List Before Saving File: ", switchList)
   switchList[payload.uuid] = payload
   saveDataFile(switchList)
-  console.log("Switch List After Saving File: ", switchList)
   sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
   return true;
 }
@@ -85,16 +82,37 @@ function finishPair(pairData) {
 
   if (pairSwitch(pairData.payload)) {
     const pairConnection = pairRequests[uuid];
-    console.log("Sending Pair Complete Message to ",uuid)
     pairConnection.send(JSON.stringify({ type: 'pairRequestCompleted', payload: pairData.payload }))
     pairConnection.close()
-    pairRequests[uuid] = null
+    delete pairRequests[uuid]
     sendReactClientsMessage(JSON.stringify({ type: 'pairRequestCompleted', payload: pairData.payload }))
     return;
   }
   // Handle if pair failed
 
 }
+
+function handleConfigSwitch(command) {
+  const {uuid, value, left, right, top, bottom, front, back} = command.payload
+  if(connections.switches[uuid] == null) {
+    switchList[uuid].connected = false;
+    sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
+    return;
+  }
+
+
+  switchList[uuid].left  = left;
+  switchList[uuid].right = right;
+  switchList[uuid].top = top;
+  switchList[uuid].bottom = bottom;
+  switchList[uuid].front = front;
+  switchList[uuid].back = back;
+  console.log(switchList)
+  saveDataFileAsync(switchList)
+  sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
+  connections.switches[uuid].send(JSON.stringify({ type: 'configSides', payload: {left,right,top,bottom,front,back} })) 
+  }
+
 
 function handleSwitchToggle(command) {
   const {uuid, value} = command.payload
@@ -103,23 +121,19 @@ function handleSwitchToggle(command) {
     sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
     return;
   } 
-
   switchList[uuid].value = value;
   console.log(switchList)
   saveDataFileAsync(switchList)
   sendReactClientsMessage(JSON.stringify({ type: 'syncInformation', payload: { switchList: switchList} }))
-  connections.switches[uuid].send(JSON.stringify({ type: 'changeValue', payload: { switchValue: value} }))
+  connections.switches[uuid].send(JSON.stringify({ type: 'changeValue', payload: {switchValue: value} }))
 }
 
 
 
 wss.on('connection', (ws) => {
 
-
   ws.on('message', (message) => {
     message = message.toString('utf-8')
-    console.log("Message: ", message)
-
     if (!canParseJSON(message)) {
       console.log("Unformatted Message Received (Not JSON): " + message)
       return;
@@ -128,7 +142,6 @@ wss.on('connection', (ws) => {
     const messageObject = JSON.parse(message)
 
     switch (messageObject.type) {
-    
       case 'authenticate':
         handleAuthentication(ws, messageObject)
         break;

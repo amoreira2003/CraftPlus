@@ -1,7 +1,7 @@
 local utils = require("smartSwitch/utils")
 connectionUrl = ''
 local switchUuid = utils.uuid()
-
+config = {}
 local running = true
 
 
@@ -29,10 +29,37 @@ function handleMessages(socket, message)
     term.clear()
     writeCentered("Connecting was a failure")
     writeCentered(jsonMessage.payload.reason, 1)
+  elseif jsonMessage.type == 'configSides' then 
+
+  local configData = textutils.serializeJSON(jsonMessage.payload)
+  local configFile = fs.open("smartSwitch/config.data", "w")
+  if configFile then
+    configFile.write(configData)
+    writeCentered("Writing config data to the file")
+    writeCentered("Reading config data to the RAM")
+    config = textutils.unserializeJSON(configFile.readAll())
+    writeCentered("Reading config data to the RAM")
+    configFile.close()
+  else
+    writeCentered("Failed to open the file for writing.")
+  end
+  
   elseif jsonMessage.type == 'changeValue' then
     term.clear()
     writeCentered("Switch Toggle To: " .. tostring(jsonMessage.payload.switchValue))
-    redstone.setOutput("right", jsonMessage.payload.switchValue)
+    local left = config.payload.left
+    local right = config.payload.right
+    local top = config.payload.top
+    local bottom = config.payload.bottom
+    local front = config.payload.front
+    local back = config.payload.back
+    if left == true then redstone.setOutput("left", jsonMessage.payload.switchValue) end
+    if right == true then redstone.setOutput("right", jsonMessage.payload.switchValue) end
+    if top == true then redstone.setOutput("top", jsonMessage.payload.switchValue) end
+    if bottom == true then redstone.setOutput("bottom", jsonMessage.payload.switchValue) end
+    if front == true then redstone.setOutput("front", jsonMessage.payload.switchValue) end
+    if back == true then redstone.setOutput("back", jsonMessage.payload.switchValue) end
+    
   end
 end
 
