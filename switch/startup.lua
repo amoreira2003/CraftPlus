@@ -1,1 +1,1 @@
-shell.run("smartswitch")
+shell.run("smartSwitch")

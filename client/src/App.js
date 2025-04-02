@@ -4,7 +4,6 @@ import on from "./on.webp";
 import off from "./off.webp";
 import configIMG from "./configure.webp";
 import Sockette from "sockette";
-import BlockSideSelector from "./BlockSideSelector";
 
 function App() {
   const [switchList, setSwitchList] = useState({});
@@ -13,7 +12,7 @@ function App() {
   const socket = useRef(null);
 
   useEffect(() => {
-    new Sockette("ws://127.0.0.1:3100", {
+    new Sockette("ws://191.101.235.108:3100", {
       timeout: 1000,
       maxAttempts: 10,
       onopen: (e) => {
@@ -190,8 +189,6 @@ function App() {
             <h1>Smart Config</h1>
             <h6>
               Lets you control your redstone contraptions from anywhere. 
-
-              <BlockSideSelector/>
             </h6>
           </div>
           </div>
